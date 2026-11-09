@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>理科器具管理システム</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #f4f6f8;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // 1. あなたのGAS WebアプリURL（末尾が /exec のもの）に書き換えてください
+    const GAS_BASE_URL = "https://script.google.com/macros/s/AKfycbzlOBvfTDeFLeLvr1pcKyC__t0n-cbQ1Rbbuf9Hmk-iBqj6miLxM4-NUdZfvFnOZilr/exec";
+
+    // 2. アクセスされたURLからパラメータ（?id=... や ?search=... など）を取得
+    const currentParams = window.location.search;
+
+    // 3. パラメータをそのままGASのURLに引き継いでiframeを生成
+    const targetUrl = currentParams ? `${GAS_BASE_URL}${currentParams}` : GAS_BASE_URL;
+
+    const iframe = document.createElement('iframe');
+    iframe.src = targetUrl;
+    iframe.allow = "fullscreen";
+    document.body.appendChild(iframe);
+  </script>
+</body>
+</html>
