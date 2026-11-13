@@ -111,19 +111,30 @@
     const GAS_BASE_URL = "https://script.google.com/macros/s/AKfycbzlOBvfTDeFLeLvr1pcKyC__t0n-cbQ1Rbbuf9Hmk-iBqj6miLxM4-NUdZfvFnOZilr/exec";
     const STORAGE_KEY = "kaimei_lab_pw_token";
 
-    // ページ読み込み時の処理
     function initApp() {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // resetパラメータ付きで戻された場合は保存済みパスワードを削除して再入力画面へ
+      if (urlParams.get('reset') === '1') {
+        localStorage.removeItem(STORAGE_KEY);
+        urlParams.delete('reset');
+        const cleanSearch = urlParams.toString();
+        const newUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '');
+        window.history.replaceState({}, '', newUrl);
+        
+        document.getElementById('auth-error').style.display = 'block';
+        document.getElementById('auth-screen').style.display = 'flex';
+        return;
+      }
+
       const savedPw = localStorage.getItem(STORAGE_KEY);
       if (savedPw) {
-        // 保存済みの合言葉があればGASへ渡して読み込み
         loadGasIframe(savedPw);
       } else {
-        // 未入力ならロック画面を表示
         document.getElementById('auth-screen').style.display = 'flex';
       }
     }
 
-    // 送信ボタン押下時の処理（HTML側では正誤判定せずGASへ送る）
     function submitPasscode() {
       const inputEl = document.getElementById('passcode-input');
       const entered = inputEl.value.trim();
@@ -134,13 +145,10 @@
       loadGasIframe(entered);
     }
 
-    // GASのURLに ?pw=入力値 を付与してiframe生成
     function loadGasIframe(passcode) {
-      // 古いiframeがあれば削除
       const oldFrame = document.querySelector('iframe');
       if (oldFrame) oldFrame.remove();
 
-      // 現在のURLパラメータ（?id=... など）に合言葉パラメータを結合
       const urlParams = new URLSearchParams(window.location.search);
       urlParams.set('pw', passcode);
 
@@ -152,7 +160,7 @@
       document.body.appendChild(iframe);
     }
 
-    // GAS側から「認証失敗（再入力）」の合図を受け取った時の処理
+    // postMessageでのリセット通知受信
     window.addEventListener('message', function(event) {
       if (event.data === 'AUTH_FAILED') {
         localStorage.removeItem(STORAGE_KEY);
